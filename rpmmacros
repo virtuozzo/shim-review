@@ -1,0 +1,4 @@
+%dist .vl9
+%_topdir    /builddir/build/
+%_tmp       %{_topdir}/tmp
+%_smp_mflags    %{nil}
