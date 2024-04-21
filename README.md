@@ -159,7 +159,7 @@ Yes all 3
 *******************************************************************************
 ### Do you build your signed kernel with additional local patches? What do they do?
 *******************************************************************************
-Yes, the main intention of the patches - provide the high density virtualisation. Support of system containers, Perfomance optimization for Virtuozzo solutions.
+Yes, the main intention of the patches - provide the high density virtualisation. Support of system containers(OpenVZ), Perfomance optimization for Virtuozzo solutions.
 
 *******************************************************************************
 ### Do you use an ephemeral key for signing kernel modules?
@@ -201,7 +201,7 @@ None, no previous SHIM signed.
 *******************************************************************************
 ### What is the SHA256 hash of your final SHIM binary?
 *******************************************************************************
-e9e1d688ddd3924179a143e2714c64a058a60ee0699b964779b56b7ba42d66fc  shimx64.efi
+e2ef9c8e9b589630a83c0ff2a827e3d7ebc4d664165e640744f1e23fea464aab  shimx64.efi
 
 *******************************************************************************
 ### How do you manage and protect the keys used in your SHIM?
