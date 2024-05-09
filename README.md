@@ -50,15 +50,15 @@ You will be asked to post the contents of these mails in your `shim-review` issu
 - Name: Artem Vasiliev
 - Position: Build Systems TeamLead
 - Email address: artem.vasiliev@virtuozzo.com
-- PGP key fingerprint: AFE5 4587 9350 6517 6FFC 67C6 2D9D 190B CF62 D8C3 (https://keys.openpgp.org/vks/v1/by-fingerprint/AFE54587935065176FFC67C62D9D190BCF62D8C3)
+- PGP key fingerprint: AFE5 4587 9350 6517 6FFC 67C6 2D9D 190B CF62 D8C3 (https://keyserver.ubuntu.com/pks/lookup?search=AFE54587935065176FFC67C62D9D190BCF62D8C3&fingerprint=on&op=index)
 
 *******************************************************************************
 ### Who is the secondary contact for security updates, etc.?
 *******************************************************************************
 - Name: Denis Lunev
-- Position: Virtualisation Development TeamLead
+- Position: Virtualisation Development TeamLead (OpenVz is our OpenSource fork)
 - Email address: den@openvz.org
-- PGP key fingerprint: F6F1 367F 707C F915 1922 7CAD 3F30 A5AE 9377 9C9F (https://keys.openpgp.org/vks/v1/by-fingerprint/F6F1367F707CF91519227CAD3F30A5AE93779C9F)
+- PGP key fingerprint: 0BAE AA87 D302 0ADC 1150 E51F 5E07 71B6 CB66 6CAB (https://keyserver.ubuntu.com/pks/lookup?search=0BAEAA87D3020ADC1150E51F5E0771B6CB666CAB&fingerprint=on&op=index)
 
 *******************************************************************************
 ### Were these binaries created from the 15.8 shim release tar?
