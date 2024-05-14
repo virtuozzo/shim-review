@@ -239,6 +239,17 @@ fwupd-efi,1,Firmware update daemon,fwupd-efi,1.4,https://github.com/fwupd/fwupd
 fwupd-efi.rhel,1,Red Hat Enterprise Linux,fwupd,1.8.16,mail:secalert@redhat.com
 fwupd-efi.virtuozzo,1,Virtuozzo,fwupd,1.8.16,mail:security@virtuozzo.com
 
+UKI(not currently built but estimated as):
+sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+systemd,1,The systemd Developers,systemd,252,https://systemd.io/
+systemd.rhel,1,Red Hat Enterprise Linux,systemd,252-18.el9,https://bugzilla.redhat.com/
+systemd.virtuozzo,1,Virtuozzo,systemd,systemd-252-18.vl9,mail:security@virtuozzo.com
+linux,1,Red Hat,linux,5.14.0-362.18.1.el9_3.x86_64,https://bugzilla.redhat.com/
+linux.rhel,1,Red Hat,linux,5.14.0-362.18.1.el9_3.x86_64,https://bugzilla.redhat.com/
+linux.virtuozzo,1,Virtuozzo,5.14.0-362.18.1.vz9,https://bugzilla.redhat.com/
+kernel-uki-virt.rhel,1,Red Hat,kernel-uki-virt,5.14.0-362.18.1.el9_3.x86_64,https://bugzilla.redhat.com/
+kernel-uki-virt.virtuozzo,1,Virtuozzo,kernel-uki-virt,5.14.0-362.18.1.vz9,mail:security@virtuozzo.com
+
 *******************************************************************************
 ### If shim is loading GRUB2 bootloader, which modules are built into your signed GRUB2 image?
 *******************************************************************************
