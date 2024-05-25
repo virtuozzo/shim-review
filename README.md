@@ -201,12 +201,12 @@ None, no previous SHIM signed.
 *******************************************************************************
 ### What is the SHA256 hash of your final SHIM binary?
 *******************************************************************************
-e2ef9c8e9b589630a83c0ff2a827e3d7ebc4d664165e640744f1e23fea464aab  shimx64.efi
+fa7866274689d8cec54380183e6ebf46fa79c14bf39f4f88c6169a6c9de7834c  shimx64.efi
 
 *******************************************************************************
 ### How do you manage and protect the keys used in your SHIM?
 *******************************************************************************
-Those are stored in protected centralized storage in Hashicorp Vault.
+Those are stored in protected centralized storage in Hashicorp Vault. Underlying HSM device is Safenet eToken 5110+ FIPS USB.
 
 *******************************************************************************
 ### Do you use EV certificates as embedded certificates in the SHIM?
@@ -273,7 +273,7 @@ Shim launches only GRUB, no other components.
 *******************************************************************************
 ### If your GRUB2 or systemd-boot launches any other binaries that are not the Linux kernel in SecureBoot mode, please provide further details on what is launched and how it enforces Secureboot lockdown.
 *******************************************************************************
-GRUB will launch only linux kernel, no other components. However we are kkeping in mind probable necessity in future to use fwupd for firmware updates. 
+GRUB will launch only linux kernel, no other components. However we are keeping in mind probable necessity in future to use fwupd for firmware updates. 
 
 *******************************************************************************
 ### How do the launched components prevent execution of unauthenticated code?
