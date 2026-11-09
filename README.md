@@ -27,7 +27,7 @@ Here's the template:
 ### What organization or people are asking to have this signed?
 *******************************************************************************
 Organization name and website:  
-[your text here]
+Virtuozzo International GmbH, https://www.virtuozzo.com/
 
 *******************************************************************************
 ### What's the legal data that proves the organization's genuineness?
@@ -37,7 +37,8 @@ Provide the information, which can prove the genuineness with certainty.
 Company/tax register entries or equivalent:  
 (a link to the organization entry in your jurisdiction's register will do)  
 
-[your text here]
+Swiss commercial register (Zefix): Virtuozzo International GmbH, UID CHE-274.027.033, seat Schaffhausen  
+https://www.zefix.ch/en/search/entity/list/firm/1286290
 
 The public details of both your organization and the issuer in the EV certificate used for signing .cab files at Microsoft Hardware Dev Center File Signing Services.  
 (**not** the CA certificate embedded in your shim binary)
@@ -49,22 +50,25 @@ Issuer: O=MyIssuer, Ltd., CN=MyIssuer EV Code Signing CA
 Subject: C=XX, O=MyCompany, Inc., CN=MyCompany, Inc.
 ```
 
-[your text here]
+```
+Issuer: C=GB, O=Sectigo Limited, CN=Sectigo Public Code Signing CA EV R36
+Subject: serialNumber=CHE-274.027.033, jurisdictionC=CH, businessCategory=Private Organization, C=CH, ST=Schaffhausen, O=Virtuozzo International GmbH, CN=Virtuozzo International GmbH
+```
 
 *******************************************************************************
 ### What product or service is this for?
 *******************************************************************************
-[your text here]
+Virtuozzo Infrastructure 8.x (formerly Virtuozzo Hybrid Infrastructure): a bare-metal hyperconverged platform (KVM virtualization, software-defined storage, networking) installed on customers' and service providers' servers. Version 8.x is built on Virtuozzo Linux 10, a RHEL 10 rebuild with our own kernel.
 
 *******************************************************************************
 ### What's the justification that this really does need to be signed for the whole world to be able to boot it?
 *******************************************************************************
-[your text here]
+The product is installed on bare-metal servers owned by hosting providers and enterprises, where UEFI Secure Boot is more and more often a mandatory policy. These servers trust the Microsoft UEFI CA, so our boot chain has to start from a Microsoft-signed shim. Our previous shim (review #406) is signed by the Microsoft UEFI CA 2011, which is being phased out; new machines only trust the Microsoft UEFI CA 2023.
 
 *******************************************************************************
 ### Why are you unable to reuse shim from another distro that is already signed?
 *******************************************************************************
-[your text here]
+We ship our own kernel (OpenVZ/Virtuozzo patches for system containers and high-density virtualization) that is not signed by any other vendor, so no other distro's shim would boot it.
 
 *******************************************************************************
 ### Who is the primary contact for security updates, etc.?
@@ -75,20 +79,24 @@ You will be asked to post the contents of these mails in your `shim-review` issu
 Please upload the PGP keys to a well-known keyserver like keyserver.ubuntu.com and/or include them in the review as an .asc file, and point to them here.
 
 *******************************************************************************
-- Name:
-- Position:
-- Email address:
-- PGP key fingerprint:
-- File/keyserver location:
+- Name: Artem Vasiliev
+- Position: Build Systems Team Lead
+- Email address: artem.vasiliev@virtuozzo.com
+- PGP key fingerprint: AFE5 4587 9350 6517 6FFC 67C6 2D9D 190B CF62 D8C3
+- File/keyserver location: https://keyserver.ubuntu.com/pks/lookup?search=AFE54587935065176FFC67C62D9D190BCF62D8C3&fingerprint=on&op=index
+
+Same contact and key as in the last verification (review #406); cross-signed with the secondary contact.
 
 *******************************************************************************
 ### Who is the secondary contact for security updates, etc.?
 *******************************************************************************
-- Name:
-- Position:
-- Email address:
-- PGP key fingerprint:
-- File/keyserver location:
+- Name: Denis V. Lunev
+- Position: Virtualization Development Team Lead, co-founder (OpenVZ is our open-source project)
+- Email address: den@openvz.org
+- PGP key fingerprint: 0BAE AA87 D302 0ADC 1150 E51F 5E07 71B6 CB66 6CAB
+- File/keyserver location: https://keyserver.ubuntu.com/pks/lookup?search=0BAEAA87D3020ADC1150E51F5E0771B6CB666CAB&fingerprint=on&op=index
+
+Same contact and key as in the last verification (review #406); cross-signed with the primary contact.
 
 *******************************************************************************
 ### Were these binaries created from the 16.1 shim release tar?
@@ -122,7 +130,10 @@ authentic, please confirm this here with a simple *yes*.
 
 A short guide on verifying public keys and signatures should be available in the [docs](./docs/) directory.
 *******************************************************************************
-[your text here]
+Yes. The source RPM in this repo contains the unmodified release tarball:
+```
+46319cd228d8f2c06c744241c0f342412329a7c630436fce7f82cf6936b1d603  shim-16.1.tar.bz2
+```
 
 *******************************************************************************
 ### URL for a repo that contains the exact code which was built to result in your binary:
@@ -130,26 +141,32 @@ Hint: If you attach all the patches and modifications that are being used to you
 
 You can also point to your custom git servers, where the code is hosted.
 *******************************************************************************
-[your url here]
+https://github.com/virtuozzo/shim-review (this repo: `shim-unsigned-x64-16.1-1.vl10.src.rpm` and `Dockerfile`)  
+Upstream: https://github.com/rhboot/shim/tree/16.1
 
 *******************************************************************************
 ### What patches are being applied and why:
 Mention all the external patches and build process modifications, which are used during your building process, that make your shim binary be the exact one that you posted as part of this application.
 *******************************************************************************
-[your text here]
+No patches to shim. Build settings only (see the spec in the SRPM):
+- `VENDOR_CERT_FILE=secureboot-ca-x86_64.cer` (our new CA, DER)
+- `data/sbat.virtuozzo.csv` with our vendor SBAT entry
+- `ENABLE_SHIM_HASH=true`, `SBAT_AUTOMATIC_DATE=2023012900` (as in RHEL 10)
+- `EFIDIR=virtuozzo`, `DEFAULT_LOADER=\\grubx64.efi`
+- `COMMIT_ID=afc49558b34548644c1cd0ad1b6526a9470182ed` (the 16.1 tag)
 
 *******************************************************************************
 ### Do you have the NX bit set in your shim? If so, is your entire boot stack NX-compatible and what testing have you done to ensure such compatibility?
 
 See https://techcommunity.microsoft.com/t5/hardware-dev-center/nx-exception-for-shim-community/ba-p/3976522 for more details on the signing of shim without NX bit.
 *******************************************************************************
-[your text here]
+No, the NX bit is not set (`DllCharacteristics 0`).
 
 *******************************************************************************
 ### What exact implementation of Secure Boot in GRUB2 do you have? (Either Upstream GRUB2 shim_lock verifier or Downstream RHEL/Fedora/Debian/Canonical-like implementation)
 Skip this, if you're not using GRUB2.
 *******************************************************************************
-[your text here]
+Downstream RHEL 10 implementation (Virtuozzo Linux 10 rebuild of the RHEL 10 grub2 package).
 
 *******************************************************************************
 ### Do you have fixes for all the following GRUB2 CVEs applied?
@@ -217,21 +234,25 @@ Skip this, if you're not using GRUB2.
   * CVE-2025-1118
   * CVE-2025-1125
 *******************************************************************************
-[your text here]
+Yes. Our grub2 is the RHEL 10 grub2-2.12-46 source package rebuilt without changes to the Secure Boot code, so all the listed fixes are present (it carries `grub,5`). Our only extra patches are three cosmetic graphics patches, attached: `vl-1002-gfx-terminal-background.patch`, `vl-1003-gfx-cut-long-titles-using-ellipsis.patch`, `vl-1004-Support-showing-UEFI-logo-when-booting-in-UEFI.patch`.
 
 *******************************************************************************
 ### If shim is loading GRUB2 bootloader, and if these fixes have been applied, is the upstream global SBAT generation in your GRUB2 binary set to 5?
 Skip this, if you're not using GRUB2, otherwise do you have an entry in your GRUB2 binary similar to:  
 `grub,5,Free Software Foundation,grub,GRUB_UPSTREAM_VERSION,https://www.gnu.org/software/grub/`?
 *******************************************************************************
-[your text here]
+Yes:
+```
+grub,5,Free Software Foundation,grub,2.12,https//www.gnu.org/software/grub/
+```
 
 *******************************************************************************
 ### Were old shims hashes provided to Microsoft for verification and to be added to future DBX updates?
 ### Does your new chain of trust disallow booting old GRUB2 builds affected by the CVEs?
 If you had no previous signed shim, say so here. Otherwise a simple _yes_ will do.
 *******************************************************************************
-[your text here]
+Our previous shim (review #406, shim 15.8, SHA256 `fa7866274689d8cec54380183e6ebf46fa79c14bf39f4f88c6169a6c9de7834c`) embeds our old CA. We will provide its hash to Microsoft for a future DBX update.  
+Yes: the new shim embeds only the new CA, so it cannot boot any GRUB2 build signed under the old CA.
 
 *******************************************************************************
 ### If your boot chain of trust includes a Linux kernel:
@@ -241,30 +262,30 @@ If you had no previous signed shim, say so here. Otherwise a simple _yes_ will d
 Hint: upstream kernels should have all these applied, but if you ship your own heavily-modified older kernel version, that is being maintained separately from upstream, this may not be the case.  
 If you are shipping an older kernel, double-check your sources; maybe you do not have all the patches, but ship a configuration, that does not expose the issue(s).
 *******************************************************************************
-[your text here]
+Yes, all three. Our kernel is based on the RHEL 10 6.12 kernel (6.12.0-211.52.1.22.x.vz10), which contains them.
 
 *******************************************************************************
 ### How does your signed kernel enforce lockdown when your system runs with Secure Boot enabled?
 Hint: If it does not, we are not likely to sign your shim.
 *******************************************************************************
-[your text here]
+`CONFIG_SECURITY_LOCKDOWN_LSM=y`, `CONFIG_SECURITY_LOCKDOWN_LSM_EARLY=y`, `CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT=y`: the kernel enters integrity lockdown automatically when booted with Secure Boot enabled (RHEL behaviour).
 
 *******************************************************************************
 ### Do you build your signed kernel with additional local patches? What do they do?
 *******************************************************************************
-[your text here]
+Yes. The patches add OpenVZ/Virtuozzo system containers (resource isolation, checkpoint/restore), high-density virtualization and performance features for our products. They do not touch the lockdown, module signature, kexec or EFI Secure Boot code of the RHEL kernel.
 
 *******************************************************************************
 ### Do you use an ephemeral key for signing kernel modules?
 ### If not, please describe how you ensure that one kernel build does not load modules built for another kernel.
 *******************************************************************************
-[your text here]
+Yes. Every kernel build generates a new module signing key (`CONFIG_MODULE_SIG_KEY="certs/signing_key.pem"`, created during the build and discarded afterwards); modules of two different builds carry different signing key IDs.
 
 *******************************************************************************
 ### If you use vendor_db functionality of providing multiple certificates and/or hashes please briefly describe your certificate setup.
 ### If there are allow-listed hashes please provide exact binaries for which hashes are created via file sharing service, available in public with anonymous access for verification.
 *******************************************************************************
-[your text here]
+We don't use vendor_db; a single CA certificate is embedded via `VENDOR_CERT_FILE`.
 
 *******************************************************************************
 ### If you are re-using the CA certificate from your last shim binary, you will need to add the hashes of the previous GRUB2 binaries exposed to the CVEs mentioned earlier to vendor_dbx in shim. Please describe your strategy.
@@ -272,7 +293,7 @@ This ensures that your new shim+GRUB2 can no longer chainload those older GRUB2 
 
 If this is your first application or you're using a new CA certificate, please say so here.
 *******************************************************************************
-[your text here]
+We are using a **new** CA certificate (`Virtuozzo Secure Boot CA 2026`); the CA from review #406 is not embedded, so vendor_dbx is not needed.
 
 *******************************************************************************
 ### Is the Dockerfile in your repository the recipe for reproducing the building of your shim binary?
@@ -282,13 +303,23 @@ Hint: Prefer using *frozen* packages for your toolchain, since an update to GCC,
 
 If your shim binaries can't be reproduced using the provided Dockerfile, please explain why that's the case, what the differences would be and what build environment (OS and toolchain) is being used to reproduce this build? In this case please write a detailed guide, how to setup this build environment from scratch.
 *******************************************************************************
-[your text here]
+Yes. `docker build .` rebuilds `shimx64.efi` and compares it byte for byte with the attached binary.
+The toolchain is frozen: the base image is pinned by digest (`almalinux:10.1@sha256:5e1f19a1fc018dcb17f042411bff68c64cb06131ff1a71356d0be011f87c7baa`) and all packages come from the AlmaLinux 10.1 vault (10.1 is superseded by 10.2, so the vault no longer changes). Toolchain used:
+```
+gcc-14.3.1-2.1.el10.alma.1.x86_64
+binutils-2.41-58.el10_1.2.alma.1.x86_64
+glibc-devel-2.39-58.el10_1.7.alma.1.x86_64
+elfutils-libelf-devel-0.193-1.el10.x86_64
+openssl-devel-3.5.1-7.el10_1.alma.1.x86_64
+pesign-116-6.el10.alma.1.x86_64
+make-4.4.1-9.el10.x86_64
+```
 
 *******************************************************************************
 ### Which files in this repo are the logs for your build?
 This should include logs for creating the buildroots, applying patches, doing the build, creating the archives, etc.
 *******************************************************************************
-[your text here]
+`build.log`: the full `docker build` output (buildroot creation, builddep, rpmbuild, comparison with the attached binary).
 
 *******************************************************************************
 ### What changes were made in the distro's secure boot chain since your SHIM was last signed?
@@ -296,24 +327,33 @@ For example, signing new kernel's variants, UKI, systemd-boot, new certs, new CA
 
 Skip this, if this is your first application for having shim signed.
 *******************************************************************************
-[your text here]
+- shim 15.8 → 16.1.
+- **New CA** `Virtuozzo Secure Boot CA 2026`, RSA-4096, generated inside a YubiHSM 2 FIPS in FIPS mode (see the key protection answer). The CA used in review #406 is retired.
+- New GRUB2 and kernel signing certificates issued from the new CA (CA:FALSE, EKU codeSigning only).
+- Distro base moved from Virtuozzo Linux 9 (RHEL 9) to Virtuozzo Linux 10 (RHEL 10): grub2 2.06 → 2.12 (SBAT grub,5), kernel 5.14 → 6.12.
+- No UKI, no systemd-boot.
 
 *******************************************************************************
 ### What is the SHA256 hash of your final shim binary?
 *******************************************************************************
-[your text here]
+```
+e0af797310b2137f026b498972796effcf1eb516e20a0e14b8f5463351d4e6db  shimx64.efi
+```
 
 *******************************************************************************
 ### How do you manage and protect the keys used in your shim?
 Describe the security strategy that is used for key protection. This can range from using hardware tokens like HSMs or Smartcards, air-gapped vaults, physical safes to other good practices.
 *******************************************************************************
-[your text here]
+- **CA key**: generated on 2026-11-09 inside a YubiHSM 2 FIPS (FIPS 140-2 Level 3) with FIPS mode enabled, in a recorded ceremony. The key has never existed outside the HSM; it can only be exported wrapped under an HSM wrap key, for a backup to a second YubiHSM 2 FIPS. The factory authentication key was deleted; there are two named administrator authentication keys (the two security contacts), each with its own password kept only in that person's password manager. The CA key is in its own HSM domain and is used only to issue signing certificates.
+- **GRUB2 / kernel signing keys**: two separate RSA-4096 keys generated inside the same HSM, non-exportable, in a different HSM domain (`Virtuozzo Secure Boot GRUB Signing 2026`, `Virtuozzo Secure Boot Kernel Signing 2026`; CA:FALSE, EKU codeSigning only). The signing builder uses them through a dedicated sign-only authentication key limited to that domain, so it cannot use the CA key.
+- The HSM is attached to a server in an access-controlled data center; only the Build Systems team has access to the host.
+- **Previous CA (review #406)**: the private key of the previous CA is damaged and no longer exists, so no new certificates can be issued from it. That CA is retired: it is not embedded in this shim, and we will ask Microsoft to add the old shim to DBX. The signing keys issued from it are kept only to maintain our legacy 7.x line (still on the old shim) until its end of life; they are not trusted by this shim.
 
 *******************************************************************************
 ### Do you use EV certificates as embedded certificates in the shim?
 A _yes_ or _no_ will do. There's no penalty for the latter.
 *******************************************************************************
-[your text here]
+No.
 
 *******************************************************************************
 ### Are you embedding a CA certificate in your shim?
@@ -322,7 +362,7 @@ if _yes_: does that certificate include the X509v3 Basic Constraints
 to say that it is a CA? See the [docs](./docs/) for more guidance
 about this.
 *******************************************************************************
-[your text here]
+Yes. It has `X509v3 Basic Constraints: critical, CA:TRUE, pathlen:0` and `X509v3 Key Usage: critical, Certificate Sign, CRL Sign`.
 
 *******************************************************************************
 ### What certificates are embedded in your shim, and what are their key types and sizes?
@@ -337,7 +377,10 @@ are not required to replace it, but are strongly encouraged to replace
 smaller RSA keys with 4096-bit or larger keys when they have an
 appropriate opportunity to do so.
 *******************************************************************************
-[your text here]
+One certificate, **newly embedded**: `secureboot-ca-x86_64.cer`
+- Subject: `C=CH, ST=Zurich, L=Zurich, O=Virtuozzo International GmbH, CN=Virtuozzo Secure Boot CA 2026, emailAddress=security@virtuozzo.com`
+- RSA 4096, sha256WithRSAEncryption, valid 2026-11-09 → 2046-11-09
+- SHA256 fingerprint: `3F:86:26:38:E3:8C:6F:BF:4E:64:4D:5A:18:7E:30:A8:82:A6:A8:3F:D7:34:9B:23:2C:57:9F:4B:AA:7C:B0:2C`
 
 *******************************************************************************
 ### Do you add a vendor-specific SBAT entry to the SBAT section in each binary that supports SBAT metadata ( GRUB2, fwupd, fwupdate, systemd-boot, systemd-stub, shim + all child shim binaries )?
@@ -350,7 +393,21 @@ If you are using a downstream implementation of GRUB2 (e.g. from Fedora or Debia
 
 Hint: run `objcopy --dump-section .sbat=/dev/stdout YOUR_EFI_BINARY` to get these entries. Paste them here. Preferably surround each listing with three backticks (\`\`\`), so they render well.
 *******************************************************************************
-[your text here]
+shim:
+```
+sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+shim,4,UEFI shim,shim,1,https://github.com/rhboot/shim
+shim.virtuozzo,1,Virtuozzo,shim,16.1,mailto:security@virtuozzo.com
+```
+grub2 (grub2-2.12-46.vl10.pth1):
+```
+sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+grub,5,Free Software Foundation,grub,2.12,https//www.gnu.org/software/grub/
+grub.rh,2,Red Hat,grub2,2.12-46.vl10,mailto:secalert@redhat.com
+grub.virtuozzo,1,Virtuozzo,grub2,2.12-46.vl10.pth1,mail:security@virtuozzo.com
+grub.centos,2,Red Hat,grub2,2.12-46.vl10.pth1,mailto:secalert@redhat.com
+```
+fwupd-efi is not signed and is not booted through shim.
 
 *******************************************************************************
 ### If shim is loading GRUB2 bootloader, which modules are built into your signed GRUB2 image?
@@ -358,45 +415,47 @@ Skip this, if you're not using GRUB2.
 
 Hint: this is about those modules that are in the binary itself, not the `.mod` files in your filesystem.
 *******************************************************************************
-[your text here]
+all_video boot blscfg blsuki cat configfile cryptodisk echo ext2 f2fs fat font gcry_rijndael gcry_rsa gcry_serpent gcry_sha256 gcry_twofish gcry_whirlpool gfxmenu gfxterm gzio halt hfsplus http increment iso9660 jpeg loadenv loopback linux lvm luks luks2 memdisk mdraid09 mdraid1x minicmd net normal part_apple part_msdos part_gpt password_pbkdf2 pgp png reboot regexp search search_fs_uuid search_fs_file search_label serial sleep squash4 syslinuxcfg test tftp version video xfs zstd efi_netfs efifwsetup efinet lsefi lsefimmap connectefi backtrace chain tpm usb usbserial_common usbserial_pl2303 usbserial_ftdi usbserial_usbdebug keylayouts at_keyboard
+
+(the RHEL 10 grub2 list, unchanged)
 
 *******************************************************************************
 ### If you are using systemd-boot on arm64 or riscv, is the fix for [unverified Devicetree Blob loading](https://github.com/systemd/systemd/security/advisories/GHSA-6m6p-rjcq-334c) included?
 *******************************************************************************
-[your text here]
+Not applicable: x86_64 only, no systemd-boot.
 
 *******************************************************************************
 ### What is the origin and full version number of your bootloader (GRUB2 or systemd-boot or other)?
 *******************************************************************************
-[your text here]
+RHEL 10 downstream grub2, rebuilt as grub2-2.12-46.vl10.pth1 (upstream 2.12 + RHEL 10 patches + the three cosmetic Virtuozzo graphics patches attached to this repo).
 
 *******************************************************************************
 ### If your shim launches any other components apart from your bootloader, please provide further details on what is launched.
 Hint: The most common case here will be a firmware updater like fwupd.
 *******************************************************************************
-[your text here]
+None. shim launches only GRUB2 (plus MokManager and fallback from this same shim build).
 
 *******************************************************************************
 ### If your GRUB2 or systemd-boot launches any other binaries that are not the Linux kernel in SecureBoot mode, please provide further details on what is launched and how it enforces Secureboot lockdown.
 Skip this, if you're not using GRUB2 or systemd-boot.
 *******************************************************************************
-[your text here]
+GRUB2 launches only the Linux kernel.
 
 *******************************************************************************
 ### How do the launched components prevent execution of unauthenticated code?
 Summarize in one or two sentences, how your secure bootchain works on higher level.
 *******************************************************************************
-[your text here]
+shim verifies GRUB2 against our CA; GRUB2 verifies the kernel through the shim_lock protocol; the kernel enforces lockdown under Secure Boot and only loads modules signed with its per-build ephemeral key.
 
 *******************************************************************************
 ### Does your shim load any loaders that support loading unsigned kernels (e.g. certain GRUB2 configurations)?
 *******************************************************************************
-[your text here]
+No.
 
 *******************************************************************************
 ### What kernel are you using? Which patches and configuration does it include to enforce Secure Boot?
 *******************************************************************************
-[your text here]
+kernel-6.12.0-211.52.1.22.x.vz10: the RHEL 10 6.12 kernel plus Virtuozzo patches, with the RHEL Secure Boot configuration: `CONFIG_SECURITY_LOCKDOWN_LSM=y`, `CONFIG_SECURITY_LOCKDOWN_LSM_EARLY=y`, `CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT=y`, `CONFIG_MODULE_SIG=y`, `CONFIG_MODULE_SIG_ALL=y`, `CONFIG_INTEGRITY_PLATFORM_KEYRING=y`, `CONFIG_LOAD_UEFI_KEYS=y`, `CONFIG_IMA_ARCH_POLICY=y`.
 
 *******************************************************************************
 ### What contributions have you made to help us review the applications of other applicants?
@@ -406,9 +465,11 @@ A reasonable timeframe of waiting for a review can reach 2-3 months. Helping us 
 
 For newcomers, the applications labeled as [*easy to review*](https://github.com/rhboot/shim-review/issues?q=is%3Aopen+is%3Aissue+label%3A%22easy+to+review%22) are recommended to start the contribution process.
 *******************************************************************************
-[your text here]
+Community review of OpenText ZENworks shim 16.1: https://github.com/rhboot/shim-review/issues/594#issuecomment-6744641545  
+Community review of Parted Magic shim 16.1: https://github.com/rhboot/shim-review/issues/588#issuecomment-6744747745
 
 *******************************************************************************
 ### Add any additional information you think we may need to validate this shim signing application.
 *******************************************************************************
-[your text here]
+Previous accepted review: https://github.com/rhboot/shim-review/issues/406 (tag `virtuozzo-shim-x86_64-20240401`).  
+This application moves our product to the Microsoft UEFI CA 2023 and replaces our CA with a new HSM-backed one.

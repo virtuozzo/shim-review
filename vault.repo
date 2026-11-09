@@ -1,0 +1,18 @@
+# AlmaLinux 10.1 is superseded by 10.2, so the vault copy is frozen: the toolchain cannot drift.
+[baseos]
+name=AlmaLinux 10.1 BaseOS (vault)
+baseurl=https://vault.almalinux.org/10.1/BaseOS/x86_64/os/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+
+[appstream]
+name=AlmaLinux 10.1 AppStream (vault)
+baseurl=https://vault.almalinux.org/10.1/AppStream/x86_64/os/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+
+[crb]
+name=AlmaLinux 10.1 CRB (vault)
+baseurl=https://vault.almalinux.org/10.1/CRB/x86_64/os/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
