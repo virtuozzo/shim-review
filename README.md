@@ -151,7 +151,7 @@ Mention all the external patches and build process modifications, which are used
 No patches to shim. Build settings only (see the spec in the SRPM):
 - `VENDOR_CERT_FILE=secureboot-ca-x86_64.cer` (our new CA, DER)
 - `data/sbat.virtuozzo.csv` with our vendor SBAT entry
-- `ENABLE_SHIM_HASH=true`, `SBAT_AUTOMATIC_DATE=2023012900` (as in RHEL 10)
+- `ENABLE_SHIM_HASH=true`, `SBAT_AUTOMATIC_DATE=2023012900` (as in RHEL 10). We keep this level on purpose. Our older product lines boot through the previous shim with a `grub,3` GRUB: 7.x uses grub2-2.06-80.vl9.2, and 8.0/8.1 use grub2-2.12-14.vl10.pth1. The SbatLevel that a shim writes to NVRAM persists, and the previous shim enforces it too. A higher automatic level, such as upstream's default `2024040900` with `grub,4`, would therefore stop a server that has once run this shim from booting the install or rescue media of those lines, or from rolling back to them. Our new chain carries `grub,5` (see the SBAT section), so the latest level `2025051000` (`shim,4`, `grub,5`) can be applied through `SbatPolicy` without breaking it. We will raise the automatic level in a later shim once those lines are out of support.
 - `EFIDIR=virtuozzo`, `DEFAULT_LOADER=\\grubx64.efi`
 - `COMMIT_ID=afc49558b34548644c1cd0ad1b6526a9470182ed` (the 16.1 tag)
 
@@ -251,7 +251,7 @@ grub,5,Free Software Foundation,grub,2.12,https//www.gnu.org/software/grub/
 ### Does your new chain of trust disallow booting old GRUB2 builds affected by the CVEs?
 If you had no previous signed shim, say so here. Otherwise a simple _yes_ will do.
 *******************************************************************************
-Our previous shim (review #406, shim 15.8, SHA256 `fa7866274689d8cec54380183e6ebf46fa79c14bf39f4f88c6169a6c9de7834c`) embeds our old CA. We will provide its hash to Microsoft for a future DBX update.  
+Our previous shim (review #406, shim 15.8) embeds our old CA. Its Authenticode SHA-256, the value for DBX, is `0dd5f6989b44a647663f4ae135bb44cd21d606179eb226b9decf74d62f8b0cb9`; the file SHA-256 is `fa7866274689d8cec54380183e6ebf46fa79c14bf39f4f88c6169a6c9de7834c`. The 7.x, 8.0 and 8.1 lines still boot through that shim, so revoking it now would make supported customer servers unbootable. We will send the Authenticode hash to Microsoft for DBX when the last of those lines reaches end of life. Until then the GRUB and kernel signing keys issued from the old CA remain usable, but only for those lines. They are kept in the same YubiHSM 2 FIPS as non-exportable keys (see the key protection section).  
 Yes: the new shim embeds only the new CA, so it cannot boot any GRUB2 build signed under the old CA.
 
 *******************************************************************************
@@ -347,7 +347,7 @@ Describe the security strategy that is used for key protection. This can range f
 - **CA key**: generated on 2026-11-09 inside a YubiHSM 2 FIPS (FIPS 140-2 Level 3) with FIPS mode enabled, in a recorded ceremony. The key has never existed outside the HSM; it can only be exported wrapped under an HSM wrap key, for a backup to a second YubiHSM 2 FIPS. The factory authentication key was deleted; there are two named administrator authentication keys (the two security contacts), each with its own password kept only in that person's password manager. The CA key is in its own HSM domain and is used only to issue signing certificates.
 - **GRUB2 / kernel signing keys**: two separate RSA-4096 keys generated inside the same HSM, non-exportable, in a different HSM domain (`Virtuozzo Secure Boot GRUB Signing 2026`, `Virtuozzo Secure Boot Kernel Signing 2026`; CA:FALSE, EKU codeSigning only). The signing builder uses them through a dedicated sign-only authentication key limited to that domain, so it cannot use the CA key.
 - The HSM is attached to a server in an access-controlled data center; only the Build Systems team has access to the host.
-- **Previous CA (review #406)**: the private key of the previous CA is damaged and no longer exists, so no new certificates can be issued from it. That CA is retired: it is not embedded in this shim, and we will ask Microsoft to add the old shim to DBX. The signing keys issued from it are kept only to maintain our legacy 7.x line (still on the old shim) until its end of life; they are not trusted by this shim.
+- **Previous CA (review #406)**: the private key of the previous CA is damaged and no longer exists, so no new certificates can be issued from it. That CA is retired: it is not embedded in this shim, and we will ask Microsoft to add the old shim to DBX. The GRUB/kernel signing keys issued from it are kept only to maintain our legacy 7.x, 8.0 and 8.1 lines (still on the old shim) until their end of life; they are not trusted by this shim. These keys are kept in the same YubiHSM 2 FIPS (signing domain, sign-only, not exportable) and are used through the same signing service.
 
 *******************************************************************************
 ### Do you use EV certificates as embedded certificates in the shim?
@@ -407,6 +407,8 @@ grub.rh,2,Red Hat,grub2,2.12-46.vl10,mailto:secalert@redhat.com
 grub.virtuozzo,1,Virtuozzo,grub2,2.12-46.vl10.pth1,mail:security@virtuozzo.com
 grub.centos,2,Red Hat,grub2,2.12-46.vl10.pth1,mailto:secalert@redhat.com
 ```
+The `mail:` scheme in our `grub.virtuozzo` entry is a typo in our grub2 spec and has been there since our first SBAT GRUB. It will be `mailto:` in the next grub2 build. SBAT does not parse the URL field, so this does not affect revocation.
+
 fwupd-efi is not signed and is not booted through shim.
 
 *******************************************************************************
